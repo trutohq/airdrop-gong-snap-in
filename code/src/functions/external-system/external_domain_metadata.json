@@ -41,10 +41,34 @@
     "users": {
       "name": "Users",
       "fields": {
-        "email": {
-          "name": "Email",
+        "id": {
+          "name": "ID",
           "is_required": true,
           "type": "text"
+        },
+        "emails": {
+          "name": "Email",
+          "is_required": true,
+          "type": "array",
+          "array": {
+            "items": {
+              "type": "object",
+              "object": {
+                "properties": {
+                  "email": {
+                    "name": "Email Address",
+                    "type": "text",
+                    "is_required": true
+                  },
+                  "is_primary": {
+                    "name": "Is Primary",
+                    "type": "boolean",
+                    "is_required": true
+                  }
+                }
+              }
+            }
+          }
         },
         "name": {
           "name": "Name",

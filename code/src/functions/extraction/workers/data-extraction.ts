@@ -5,7 +5,7 @@ import { normalizeUser } from '../../external-system/data-normalization';
 import { User } from '../../external-system/types';
 
 const trutoApi = new TrutoApi({
-  token: process.env.TRUTO_API_TOKEN || 'ff1d3056-dc9c-48e1-a04f-08482aeaadf9',
+  token: process.env.TRUTO_API_TOKEN || '',
 });
 
 const repos = [

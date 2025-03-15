@@ -8,6 +8,8 @@ const trutoApi = new TrutoApi({
   token: process.env.TRUTO_API_TOKEN || '',
 });
 
+const integratedAccountId = process.env.TRUTO_INTEGRATED_ACCOUNT_ID || '';
+
 const repos = [
   {
     itemType: 'users',
@@ -19,7 +21,7 @@ const fetchUsers = async () => {
   return (await trutoApi.unifiedApi.list({
     unified_model: 'conversational-intelligence',
     resource: 'users',
-    integrated_account_id: 'aebaee05-5696-4313-8ec3-06edc0e9cfc9',
+    integrated_account_id: integratedAccountId,
     truto_ignore_remote_data: true,
   })) as Cursor<User>;
 };

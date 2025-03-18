@@ -1,74 +1,40 @@
-import { EventType, ExtractorEventType, processTask } from '@devrev/ts-adaas';
-
-import TrutoApi, { Cursor } from '@truto/truto-ts-sdk';
+import { EventType, ExtractorEventType, processTask, SyncMode } from '@devrev/ts-adaas';
+import { CONSTANTS, ERROR_MESSAGES } from '../../../common/constants';
+import { TrutoExtractorState, UserBase } from '../../../common/interfaces';
+import { emitExtractionEvent, handleError, resetStateForIncrementalSync } from '../../../common/utils';
 import { normalizeUser } from '../../external-system/data-normalization';
-import { User } from '../../external-system/types';
+import { createExtractionContext, processRepositories } from './extraction-helper';
 
-const trutoApi = new TrutoApi({
-  token: process.env.TRUTO_API_TOKEN || '',
-});
-
-const integratedAccountId = process.env.TRUTO_INTEGRATED_ACCOUNT_ID || '';
+const { ENTITY_KEY } = CONSTANTS;
+const { DATA_EXTRACTION } = ERROR_MESSAGES;
 
 const repos = [
   {
-    itemType: 'users',
-    normalize: normalizeUser,
+    itemType: ENTITY_KEY.USERS,
+    normalize: (record: object) => normalizeUser(record as UserBase),
   },
 ];
 
-const fetchUsers = async () => {
-  return (await trutoApi.unifiedApi.list({
-    unified_model: 'conversational-intelligence',
-    resource: 'users',
-    integrated_account_id: integratedAccountId,
-    truto_ignore_remote_data: true,
-  })) as Cursor<User>;
-};
-
 processTask({
   task: async ({ adapter }) => {
-    adapter.initializeRepos(repos);
-    if (adapter.event.payload.event_type === EventType.ExtractionDataStart) {
-      try {
-        const userCursor = await fetchUsers();
-        const users: User[] = [];
-
-        for await (const user of userCursor) {
-          users.push(user);
+    try {
+      adapter.initializeRepos(repos);
+      const isIncrementalMode = adapter.event.payload.event_context.mode === SyncMode.INCREMENTAL;
+      const context = await createExtractionContext(adapter);
+      if (adapter.event.payload.event_type === EventType.ExtractionDataStart) {
+        adapter.state.lastSyncStarted = new Date().toISOString();
+        if (isIncrementalMode) {
+          resetStateForIncrementalSync(adapter.state as TrutoExtractorState);
         }
-
-        console.log('Fetched users:', users.length);
-
-        // Push the normalized data to the repository
-        const normalizedUsers = users.map((user) => normalizeUser(user));
-        await adapter.getRepo('users')?.push(normalizedUsers);
-
-        // Emit progress event
-        await adapter.emit(ExtractorEventType.ExtractionDataProgress, {
-          progress: 100,
-        });
-
-        // Mark extraction as complete
-        await adapter.emit(ExtractorEventType.ExtractionDataDone);
-      } catch (error) {
-        console.error('Error during data extraction:', error);
-        await adapter.emit(ExtractorEventType.ExtractionDataError, {
-          error: {
-            message: error instanceof Error ? error.message : 'Unknown error occurred',
-          },
-        });
       }
-    } else {
-      await adapter.emit(ExtractorEventType.ExtractionDataDone, {
-        progress: 100,
-      });
+      await processRepositories(context, adapter);
+    } catch (error) {
+      handleError(ExtractorEventType.ExtractionDataError, { error, message: DATA_EXTRACTION.ERROR }, adapter);
+      await emitExtractionEvent(adapter, false);
     }
   },
   onTimeout: async ({ adapter }) => {
     await adapter.postState();
-    await adapter.emit(ExtractorEventType.ExtractionDataProgress, {
-      progress: 50,
-    });
+    await emitExtractionEvent(adapter, false);
   },
 });

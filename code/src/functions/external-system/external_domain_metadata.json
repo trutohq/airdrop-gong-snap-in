@@ -21,6 +21,11 @@
           "text": {
             "min_length": 1
           }
+        },
+        "created_date": {
+          "name": "Created Date",
+          "is_required": true,
+          "type": "text"
         }
       }
     }

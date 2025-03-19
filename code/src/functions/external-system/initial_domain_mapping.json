@@ -32,6 +32,14 @@
                   "transformation_method": {
                     "transformation_method": "use_directly"
                   }
+                },
+                "created_date": {
+                  "forward": true,
+                  "primary_external_field": "created_date",
+                  "reverse": false,
+                  "transformation_method": {
+                    "transformation_method": "use_directly"
+                  }
                 }
               }
             }

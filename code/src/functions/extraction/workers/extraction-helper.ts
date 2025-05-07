@@ -13,7 +13,7 @@ const trutoApi = new TrutoApi({
   token: process.env.TRUTO_API_TOKEN || '1a9ad498-18b5-467e-b8f5-0aac2fe796da',
 });
 
-const integratedAccountId = process.env.TRUTO_INTEGRATED_ACCOUNT_ID || 'aebaee05-5696-4313-8ec3-06edc0e9cfc9';
+const integratedAccountId = process.env.TRUTO_INTEGRATED_ACCOUNT_ID || 'ac049ab6-76b6-427a-b472-9f1bd867f8c6';
 
 export const createExtractionContext = async (adapter: WorkerAdapter<unknown>): Promise<ExtractionContext> => {
   const isIncrementalMode = adapter.event.payload.event_context.mode === SyncMode.INCREMENTAL;

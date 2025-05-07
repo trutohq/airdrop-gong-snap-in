@@ -1,4 +1,4 @@
-version: "2"
+version: '2'
 
 name: Gong Adaas
 description: Gong Adaas
@@ -13,19 +13,20 @@ functions:
     description: Create blueprint and install initial domain mapping
 
 keyring_types:
-  - id: example-connection
-    name: Example Connection
-    description: Example Connection
-    kind: "Secret"
+  - id: truto-api-key-basic
+    name: Truto API Key
+    description: Truto API Key
+    external_system_name: Truto
+    kind: 'Secret'
     is_subdomain: true
-    secret_config:
-      secret_transform: ".token" # a JQ query
+    secret_config: # The secret_config section is used to define the fields in the secret.
+      secret_transform: '.token' # a JQ query
       fields:
         - id: token
           name: Token
           description: Example API token
       token_verification:
-        urL: https://app.devrev.ai/favicon.ico
+        url: https://app.devrev.ai/favicon.ico
         method: GET
 
 imports:
@@ -34,7 +35,7 @@ imports:
     description: Gong Adaas
     extractor_function: extraction
     allowed_connection_types:
-      - example-connection
+      - truto-api-key-basic
 
 hooks:
   - type: activate

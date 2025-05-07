@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@devrev/ts-adaas": "1.2.2",
+    "@truto/truto-ts-sdk": "1.0.21",
     "axios": "^1.7.7",
     "dotenv": "^16.0.3",
     "js-jsonl": "^1.1.1",
